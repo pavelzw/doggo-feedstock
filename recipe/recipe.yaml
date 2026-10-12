@@ -15,8 +15,10 @@ build:
   script:
     - cd src
     - go-licenses save ./cmd/doggo --save_path ../library_licenses
+    # Go 1.27's PIE binaries crash at startup on linux-ppc64le (SIGSEGV in the
+    # runtime during package init), so build a regular executable there.
     - if: unix
-      then: go build -v -o $PREFIX/bin/doggo -ldflags="-s -w" ./cmd/doggo
+      then: go build -v -o $PREFIX/bin/doggo -ldflags="-s -w" ${{ "-buildmode=exe" if ppc64le else "" }} ./cmd/doggo
       else: go build -v -o %LIBRARY_BIN%\doggo.exe -ldflags="-s" .\cmd\doggo
 
 requirements:
